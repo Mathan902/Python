@@ -1,8 +1,15 @@
 from fastapi import FastAPI
+from pydantic import BaseModel
 
 app = FastAPI()
 
-characters_details = [
+class Character(BaseModel) :
+    name : str
+    role : str
+    area : str
+
+
+characters_details : Character = [
     {
         "name": "Anbu",
         "role": "rebel",
@@ -30,11 +37,24 @@ characters_details = [
     },
     {
         "name": "Palani",
-        "role": "fisherman",
+        "role": "gym-rat",
         "area": "Vada Chennai - Dockside"
     },
 ]
 
-@app.get("/")
+@app.get("/characters")
 async def characters():
     return characters_details
+
+@app.post("/characters")
+async def characters(characters : Character):
+    characters_details.append(characters)
+    print("Character Updated Details" , characters_details)
+    return {"message" : f"The character {characters.name} is succesfully added in the universe 😉"}
+
+@app.get("/character/${characterName}")
+async def get_character(characterName: str):
+    for character in characters_details:
+        if character["name"] == characterName:
+            return {"data": character}
+    return {"message": f"The character {characterName} is not found in the universe 🤷‍♂️"}
